@@ -29,8 +29,8 @@ followers = user['followers']['total']
 
 while True:
     print()
-    print(">>>>>> Welcome to Vocabify " + displayName + "!")
-    print(">>>>>> You have " + str(followers) + "followers.")
+    print(">>>>>> Welcome to Vocabify " + displayName + " !")
+    print(">>>>>> You have " + str(followers) + " followers.")
     print()
     print("0 -- Search for an artists")
     print("1 -- Exit")
@@ -45,14 +45,13 @@ while True:
 
         # Get the search results
         searchResults = spotifyObject.search(searchQuery, 1, 0, 'artist')
-        print(json.dumps(searchResults, sort_keys=True, indent=4))
 
         # Artist Details
         artist = searchResults['artists']['items'][0]
         print(artist['name'])
         print(str(artist['followers']['total']) + ' followers')
         print('Genre: ' + artist['genres'][0])
-        webbrowser.open(artist['images'][0]["url"])
+        webbrowser.open(artist['images'][0]['url'])
         artistID = artist['id']
 
         # Album Details
@@ -61,12 +60,39 @@ while True:
         z = 0
 
         # Extract some album data
-        albumResults = spotifyObject.artist_albums(artist_id=artistID)
-        print(json.dumps(albumResults, sort_keys=True, indent=4))
+        albumResults = spotifyObject.artist_albums(artistID)
+        albumResults = albumResults['items']
 
-# End the program
+        for i in albumResults:
+            print("Album " + i['name'])
+            albumID = i['id']
+            albumArt = i['images'][0]['url']
+
+            # Extract Track Data
+            trackResults = spotifyObject.album_tracks(albumID)['items']
+
+            for i in trackResults:
+                print(str(z) + ": " + i['name'])
+                trackURIs.append(i['uri'])
+                trackArt.append(albumArt)
+                z += 1
+            print()
+
+            # See Album Art
+        while True:
+            songSelection = input("Enter a song number to see the album art associated with it (x to exit): ")
+            if songSelection == "x":
+                break
+            elif 0 <= int(songSelection) > len(trackArt):
+                print(int(songSelection))
+                print(len(trackArt))
+                print(str(0 <= int(songSelection) < len(trackArt)))
+                songSelection = input("The song number you entered does not exist, please choose another song number: ")
+                webbrowser.open(trackArt[int(songSelection)])
+            else:
+                webbrowser.open(trackArt[int(songSelection)])
+
+
+    # End the program
     if choice == "1":
         break
-
-
-
